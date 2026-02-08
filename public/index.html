@@ -3,43 +3,238 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>评论区</title>
+  <title>二次元评论墙</title>
   <style>
-    /* 基础样式，确保页面美观 */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { padding: 20px; max-width: 800px; margin: 0 auto; font-family: Arial, sans-serif; }
-    .comment-form { margin-bottom: 30px; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
-    .comment-form input, .comment-form textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; }
-    .comment-form button { padding: 10px 20px; background: #007cff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    .comment-list .comment-item { padding: 15px; border-bottom: 1px solid #eee; margin: 10px 0; }
-    .comment-item .author { font-weight: bold; color: #007cff; }
-    .comment-item .time { color: #999; font-size: 12px; margin-left: 10px; }
-    .comment-item .content { margin-top: 8px; line-height: 1.5; }
+    /* 全局样式重置 + 二次元风格基础配置 */
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    }
+    
+    /* 二次元背景图（自适应、不重复、固定） */
+    body {
+      background: url('https://pic1.zhimg.com/v2-899e9d789c6948f08f90e8b3997c4885_r.jpg?source=1940ef5c') no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+    }
+    
+    /* 背景半透明遮罩（保证文字可读性） */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.85); /* 白色半透明遮罩，可调整透明度 */
+      z-index: -1;
+    }
+    
+    /* 页面容器（居中、最大宽度、阴影） */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 10px;
+    }
+    
+    /* 标题样式（二次元渐变文字） */
+    .page-title {
+      text-align: center;
+      margin: 30px 0;
+      font-size: 32px;
+      font-weight: bold;
+      background: linear-gradient(90deg, #ff69b4, #8a2be2, #00bfff);
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* 评论表单样式（卡片化、圆角、阴影） */
+    .comment-form {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      margin-bottom: 40px;
+      border: 1px solid #f0f0f0;
+    }
+    
+    .comment-form h3 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 20px;
+      border-left: 4px solid #ff69b4;
+      padding-left: 10px;
+    }
+    
+    /* 输入框样式（二次元风格圆角、渐变边框） */
+    .comment-form input, 
+    .comment-form textarea {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 12px 0;
+      border: 2px solid #eee;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.8);
+    }
+    
+    .comment-form input:focus, 
+    .comment-form textarea:focus {
+      outline: none;
+      border-color: #8a2be2;
+      box-shadow: 0 0 8px rgba(138, 43, 226, 0.2);
+    }
+    
+    .comment-form textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+    
+    /* 提交按钮（二次元渐变、hover动效） */
+    .submit-btn {
+      padding: 12px 30px;
+      background: linear-gradient(90deg, #ff69b4, #8a2be2);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+    
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+    }
+    
+    /* 评论列表标题 */
+    .comment-list-title {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    
+    /* 评论项样式（二次元卡片、hover动效） */
+    .comment-item {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+      border-left: 4px solid #00bfff;
+    }
+    
+    .comment-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    }
+    
+    /* 评论作者+时间样式 */
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .author {
+      font-weight: bold;
+      color: #8a2be2;
+      font-size: 16px;
+    }
+    
+    .time {
+      color: #999;
+      font-size: 14px;
+    }
+    
+    /* 评论内容样式 */
+    .comment-content {
+      color: #555;
+      line-height: 1.8;
+      font-size: 15px;
+      padding-top: 10px;
+      border-top: 1px dashed #eee;
+    }
+    
+    /* 空评论提示 */
+    .empty-tip {
+      text-align: center;
+      color: #999;
+      font-size: 16px;
+      padding: 40px 0;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    /* 加载提示 */
+    .loading-tip {
+      text-align: center;
+      color: #666;
+      font-size: 16px;
+      padding: 20px 0;
+    }
+    
+    /* 移动端适配 */
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 26px;
+      }
+      .comment-form {
+        padding: 20px;
+      }
+      .comment-item {
+        padding: 15px;
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- 评论提交表单（适配后端接收参数） -->
-  <div class="comment-form">
-    <h3>发表评论</h3>
-    <input type="text" id="author" placeholder="你的昵称（可选）">
-    <textarea id="content" rows="4" placeholder="请输入评论内容..."></textarea>
-    <button onclick="submitComment()">提交评论</button>
-  </div>
+  <div class="container">
+    <!-- 页面标题 -->
+    <h1 class="page-title">✨ 二次元评论墙 ✨</h1>
 
-  <!-- 评论列表展示区 -->
-  <div class="comment-list" id="commentList">
-    <!-- 评论会通过JS渲染到这里 -->
-    加载中...
+    <!-- 评论提交表单 -->
+    <div class="comment-form">
+      <h3>💬 发表你的评论</h3>
+      <input type="text" id="author" placeholder="你的昵称（可选）">
+      <textarea id="content" placeholder="请输入想分享的内容..."></textarea>
+      <button class="submit-btn" onclick="submitComment()">提交评论</button>
+    </div>
+
+    <!-- 评论列表 -->
+    <div class="comment-list">
+      <h3 class="comment-list-title">📝 评论列表</h3>
+      <div id="commentList" class="loading-tip">加载评论中...</div>
+    </div>
   </div>
 
   <script>
-    // 页面加载时自动获取评论（适配 posts.js 接口）
+    // 页面加载时自动获取评论
     window.onload = loadComments;
 
-    // 提交评论（适配 submit.js 接口）
+    // 提交评论（保留原有API逻辑）
     async function submitComment() {
-      const author = document.getElementById('author').value;
-      const content = document.getElementById('content').value;
+      const author = document.getElementById('author').value.trim() || '匿名小可爱';
+      const content = document.getElementById('content').value.trim();
+
+      // 内容校验
+      if (!content) {
+        alert('💡 评论内容不能为空哦～');
+        return;
+      }
 
       try {
         const res = await fetch('/api/submit', {
@@ -50,47 +245,55 @@
         const data = await res.json();
 
         if (data.success) {
-          alert('提交成功！');
+          alert('🎉 评论提交成功啦！');
           document.getElementById('content').value = ''; // 清空输入框
           loadComments(); // 刷新评论列表
         } else {
-          alert('提交失败：' + data.message);
+          alert('😥 提交失败：' + data.message);
         }
       } catch (error) {
-        alert('网络错误，请重试！');
+        alert('🌐 网络出错啦，请稍后再试～');
         console.error('提交失败：', error);
       }
     }
 
-    // 获取并渲染评论（适配 posts.js 返回的字段）
+    // 获取并渲染评论（保留原有API逻辑）
     async function loadComments() {
       const commentList = document.getElementById('commentList');
       try {
         const res = await fetch('/api/posts');
         const comments = await res.json();
 
-        // 渲染评论（适配建表的字段：id、content、author、created_at）
-        if (comments.length === 0) {
-          commentList.innerHTML = '<p>暂无评论，快来抢沙发！</p>';
+        // 渲染评论
+        if (!comments || comments.length === 0) {
+          commentList.innerHTML = '<div class="empty-tip">🍃 还没有评论哦，快来抢沙发～</div>';
           return;
         }
 
         commentList.innerHTML = comments.map(comment => `
           <div class="comment-item">
-            <span class="author">${comment.author}</span>
-            <span class="time">${formatTime(comment.created_at)}</span>
-            <div class="content">${comment.content}</div>
+            <div class="comment-header">
+              <span class="author">${comment.author}</span>
+              <span class="time">${formatTime(comment.created_at)}</span>
+            </div>
+            <div class="comment-content">${comment.content}</div>
           </div>
         `).join('');
       } catch (error) {
-        commentList.innerHTML = '<p>加载评论失败，请刷新页面！</p>';
+        commentList.innerHTML = '<div class="empty-tip">❌ 加载评论失败，刷新页面试试吧～</div>';
         console.error('加载评论失败：', error);
       }
     }
 
-    // 时间格式化（适配 created_at 字段）
+    // 时间格式化
     function formatTime(timeStr) {
-      return new Date(timeStr).toLocaleString('zh-CN');
+      return new Date(timeStr).toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     }
   </script>
 </body>
