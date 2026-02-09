@@ -2,7 +2,8 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 修改viewport为固定宽度（强制电脑布局） -->
+    <meta name="viewport" content="width=1200, initial-scale=1.0">
     <title>一中/三中校园墙</title>
     <style>
         * {
@@ -229,23 +230,7 @@
             opacity: 0.6;
         }
 
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .posts-container {
-                grid-template-columns: 1fr;
-            }
-
-            .post-form {
-                padding: 1.5rem;
-            }
-
-            .posts-area h2 {
-                font-size: 1.5rem;
-            }
-        }
+        /* 删除移动端响应式样式（强制电脑布局） */
     </style>
 </head>
 <body>
