@@ -2,8 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 强制不缩放、不自适应，保持电脑版显示 -->
-    <meta name="viewport" content="width=1200, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>一中/三中校园墙</title>
     <style>
         * {
@@ -22,7 +21,7 @@
             position: relative;
             color: #fff;
         }
-1
+
         body::before {
             content: "";
             position: fixed;
@@ -159,10 +158,9 @@
             font-size: 2rem;
         }
 
-        /* 强制一行 3 个，不随屏幕变小而改变 */
         .posts-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 2rem;
             margin-bottom: 4rem;
         }
@@ -201,7 +199,6 @@
             padding: 4rem 2rem;
             opacity: 0.8;
             font-size: 1.2rem;
-            grid-column: 1 / -1;
         }
 
         .empty-tip::after {
@@ -210,6 +207,24 @@
             font-size: 3rem;
             margin-top: 1.5rem;
             opacity: 0.6;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .posts-container {
+                grid-template-columns: 1fr;
+            }
+
+            .post-form {
+                padding: 1.5rem;
+            }
+
+            .posts-area h2 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -239,7 +254,7 @@
 
     <script>
         // ########## 核心配置：替换为你的 Cloudflare Pages 域名（部署后获取）##########
-        const DOMAIN = "https://yizhong-xyq.pages.dev/"; // 你的实际域名
+        const DOMAIN = "https://yizhong-xyq.pages.dev"; // 你的实际域名
 
         // ########## 随机二次元背景 API（保留原有功能）##########
         const randomBg = `https://t.alcy.cc/fj?random=${Math.random()}`;
@@ -293,7 +308,7 @@
             const time = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,0)}-${String(now.getDate()).padStart(2,0)} ${String(now.getHours()).padStart(2,0)}:${String(now.getMinutes()).padStart(2,0)}:${String(now.getSeconds()).padStart(2,0)}`;
 
             try {
-                await fetch(`${DOMAIN}/api/submit`, {
+                await fetch(`/api/submit`, {
                     method: "POST",
                     body: JSON.stringify({ content, time }),
                     headers: { "Content-Type": "application/json" }
