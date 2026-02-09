@@ -172,6 +172,7 @@
             padding: 1.8rem;
             transition: all 0.4s ease;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
 
         .post-card:hover {
@@ -192,6 +193,25 @@
             text-align: right;
             font-size: 0.95rem;
             opacity: 0.7;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.2rem;
+            background: rgba(255, 69, 69, 0.8);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 69, 69, 1);
+            transform: scale(1.05);
         }
 
         .empty-tip {
@@ -253,18 +273,27 @@
     </div>
 
     <script>
-        // ########## 核心配置：替换为你的 Cloudflare Pages 域名（部署后获取）##########
-        const DOMAIN = "https://yizhong-xyq.pages.dev"; // 你的实际域名
+        // ########## 核心功能：生成/读取用户唯一标识（存于浏览器）##########
+        function getMyUniqueId() {
+            let userId = localStorage.getItem("campus_wall_user_id");
+            if (!userId) {
+                userId = crypto.randomUUID(); // 生成唯一ID
+                localStorage.setItem("campus_wall_user_id", userId);
+            }
+            return userId;
+        }
 
         // ########## 随机二次元背景 API（保留原有功能）##########
         const randomBg = `https://t.alcy.cc/fj?random=${Math.random()}`;
         document.body.style.backgroundImage = `url(${randomBg})`;
 
-        // 加载历史帖子
+        // 加载历史帖子（只给自己的帖子显示删除按钮）
         async function loadPosts() {
             const postsContainer = document.getElementById("postsContainer");
+            const myId = getMyUniqueId(); // 获取当前用户唯一ID
             try {
-                const res = await fetch(`${DOMAIN}/api/posts`);
+                // 用相对路径请求，走Worker代理（解决跨域）
+                const res = await fetch("/api/posts");
                 const posts = await res.json();
 
                 if (posts.length === 0) {
@@ -280,7 +309,9 @@
                 posts.forEach(post => {
                     const card = document.createElement("div");
                     card.className = "post-card";
+                    // 只有帖子的user_id和当前用户ID一致，才显示删除按钮
                     card.innerHTML = `
+                        ${post.user_id === myId ? '<button class="delete-btn" onclick="deletePost(' + post.id + ')">删除</button>' : ''}
                         <div class="post-content">${post.content}</div>
                         <div class="post-time">${post.time}</div>
                     `;
@@ -296,7 +327,7 @@
             }
         }
 
-        // 发布新帖子
+        // 发布新帖子（携带用户唯一ID）
         async function publishPost() {
             const content = document.getElementById("content").value.trim();
             if (!content) {
@@ -306,11 +337,12 @@
 
             const now = new Date();
             const time = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,0)}-${String(now.getDate()).padStart(2,0)} ${String(now.getHours()).padStart(2,0)}:${String(now.getMinutes()).padStart(2,0)}:${String(now.getSeconds()).padStart(2,0)}`;
+            const user_id = getMyUniqueId(); // 携带当前用户唯一ID
 
             try {
-                await fetch(`/api/submit`, {
+                await fetch("/api/submit", {
                     method: "POST",
-                    body: JSON.stringify({ content, time }),
+                    body: JSON.stringify({ content, time, user_id }), // 新增user_id字段
                     headers: { "Content-Type": "application/json" }
                 });
                 alert("发布成功 ✨");
@@ -319,6 +351,31 @@
             } catch (e) {
                 alert("发布失败 😢 请重试～");
                 console.error("发布失败：", e);
+            }
+        }
+
+        // 删除帖子（校验用户ID）
+        async function deletePost(postId) {
+            if (!confirm("确定要删除这条内容吗？")) return;
+            const user_id = getMyUniqueId();
+
+            try {
+                const res = await fetch("/api/delete", {
+                    method: "POST",
+                    body: JSON.stringify({ id: postId, user_id }),
+                    headers: { "Content-Type": "application/json" }
+                });
+
+                const result = await res.json();
+                if (result.ok) {
+                    alert("删除成功 🗑️");
+                    loadPosts();
+                } else {
+                    alert("删除失败：" + (result.msg || "无删除权限"));
+                }
+            } catch (e) {
+                alert("删除失败 😢 请重试～");
+                console.error("删除失败：", e);
             }
         }
 
